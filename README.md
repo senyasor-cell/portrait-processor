@@ -75,35 +75,46 @@ waitress – продакшн-сервер
 # 📦 Установка
 Клонируйте репозиторий или создайте структуру папок вручную:
 
-bash
 mkdir portrait_processor_soap
+
 cd portrait_processor_soap
+
 mkdir templates static
+
 Создайте виртуальное окружение и активируйте его:
 
-bash
 python -m venv venv
+
 source venv/bin/activate      # Linux/Mac
+
 venv\Scripts\activate         # Windows
+
 Установите зависимости:
 
-bash
 pip install -r requirements.txt
+
 requirements.txt:
 
-txt
 Flask==2.3.3
+
 lxml==4.9.3
+
 Pillow==10.0.0
+
 opencv-python==4.8.1.78
+
 numpy==1.24.3
+
 rembg==2.0.50
+
 waitress==2.1.2
+
 Поместите файлы проекта в соответствующие папки согласно структуре.
 
 # 🚀 Запуск
-bash
+
 python app.py
+
 Сервер запустится на http://localhost:5000.
 
 Доступные адреса:
@@ -196,15 +207,25 @@ SOAP клиент
 
 portrait_processor_soap/
 ├── app.py                  # Основное Flask-приложение и маршруты
+
 ├── portrait_processor.py   # Логика обработки изображений
+
 ├── soap_service.py         # Парсинг и генерация SOAP-сообщений
+
 ├── requirements.txt        # Зависимости
+
 ├── README.md               # Документация
+
 ├── templates/
+
 │   ├── index.html          # Веб-интерфейс
+
 │   ├── soap_client.html    # SOAP-клиент
+
 │   └── wsdl.xml            # Шаблон WSDL
+
 └── static/
+
     └── style.css           # Стили для веб-интерфейса
 # 🧠 Описание алгоритма обработки
 Загрузка изображения – из файла или base64.
