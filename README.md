@@ -206,6 +206,7 @@ SOAP клиент
 # 📁 Структура проекта
 
 portrait_processor_soap/
+
 ├── app.py                  # Основное Flask-приложение и маршруты
 
 ├── portrait_processor.py   # Логика обработки изображений
