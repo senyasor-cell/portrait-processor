@@ -193,9 +193,9 @@ SOAP клиент
 Результат появится ниже, его можно скачать
 
 # 📁 Структура проекта
-text
+
 portrait_processor_soap/
-├── app.py                  # Основное Flask-приложение и маршруты
+├── app.py                   Основное Flask-приложение и маршруты
 ├── portrait_processor.py   # Логика обработки изображений
 ├── soap_service.py         # Парсинг и генерация SOAP-сообщений
 ├── requirements.txt        # Зависимости
