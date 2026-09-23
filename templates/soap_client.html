@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOAP Клиент - Portrait Processor</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .debug-panel {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        
+        .error-details {
+            background: #ffe6e6;
+            border: 1px solid #ff9999;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔌 SOAP Клиент</h1>
+            <p>Тестирование SOAP сервиса для обработки портретов</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="section">
+                <h2>📤 Загрузка изображения для SOAP запроса</h2>
+                
+                <div class="alert" id="soapAlert"></div>
+                
+                <div class="file-upload" id="soapDropZone">
+                    <div class="upload-icon">📷</div>
+                    <p>Перетащите файл сюда или</p>
+                    <button class="btn-primary" onclick="document.getElementById('soapFileInput').click()">
+                        Выберите файл
+                    </button>
+                    <input type="file" id="soapFileInput" class="file-input" accept=".jpg,.jpeg,.png,.bmp,.gif">
+                </div>
+                
+                <div class="file-info" id="soapFileInfo" style="display: none;">
+                    <strong>Выбранный файл:</strong>
+                    <span id="soapFileName"></span>
+                    <br>
+                    <small>Размер: <span id="soapFileSize"></span></small>
+                </div>
+                
+                <div class="options">
+                    <h3>Настройки SOAP запроса:</h3>
+                    <div class="option">
+                        <input type="checkbox" id="soapRemoveBg" checked>
+                        <label for="soapRemoveBg">Удалить фон</label>
+                    </div>
+                </div>
+                
+                <button class="btn-primary" id="sendSoapBtn" disabled>
+                    <span>📡 Отправить SOAP запрос</span>
+                </button>
+                
+                <div class="loading" id="soapLoading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Отправка SOAP запроса...</p>
+                </div>
+                
+                <div class="debug-panel" id="debugPanel" style="display: none;">
+                    <div class="debug-title">Отладочная информация:</div>
+                    <div id="debugContent"></div>
+                </div>
+                
+                <div class="error-details" id="errorDetails">
+                    <strong>Детали ошибки:</strong>
+                    <div id="errorContent"></div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>📄 SOAP запрос</h2>
+                <textarea id="soapRequest" rows="8" readonly placeholder="SOAP запрос будет сгенерирован автоматически..."></textarea>
+                
+                <h2>📄 SOAP ответ</h2>
+                <textarea id="soapResponse" rows="8" readonly placeholder="SOAP ответ будет отображен здесь..."></textarea>
+                
+                <button class="btn-primary" onclick="toggleDebug()" style="margin-top: 10px;">
+                    🔍 Показать/скрыть отладку
+                </button>
+            </div>
+            
+            <div class="section">
+                <h2>👁‍🗨 Результат обработки</h2>
+                
+                <div class="image-container">
+                    <img id="soapResultImage" src="" alt="Результат SOAP" style="display: none;">
+                    <div id="soapPlaceholder">Здесь будет отображен результат SOAP запроса</div>
+                </div>
+                
+                <button class="btn-success" id="downloadSoapBtn" style="display: none; margin-top: 15px;">
+                    💾 Скачать результат
+                </button>
+            </div>
+        </div>
+        
+        <div class="service-info">
+            <h3>📚 Информация о SOAP сервисе</h3>
+            <div class="endpoint-list">
+                <div class="endpoint">
+                    <strong>SOAP Endpoint:</strong><br>
+                    <code>/soap</code>
+                </div>
+                <div class="endpoint">
+                    <strong>WSDL:</strong><br>
+                    <a href="/wsdl" target="_blank">/wsdl</a>
+                </div>
+                <div class="endpoint">
+                    <strong>Метод:</strong><br>
+                    <code>ProcessPortrait</code>
+                </div>
+                <div class="endpoint">
+                    <strong>Пример запроса:</strong><br>
+                    <a href="#" onclick="showExample(); return false;">Показать</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Элементы DOM для SOAP клиента
+        const soapFileInput = document.getElementById('soapFileInput');
+        const soapDropZone = document.getElementById('soapDropZone');
+        const soapFileInfo = document.getElementById('soapFileInfo');
+        const soapFileName = document.getElementById('soapFileName');
+        const soapFileSize = document.getElementById('soapFileSize');
+        const sendSoapBtn = document.getElementById('sendSoapBtn');
+        const soapRequestText = document.getElementById('soapRequest');
+        const soapResponseText = document.getElementById('soapResponse');
+        const soapResultImage = document.getElementById('soapResultImage');
+        const soapPlaceholder = document.getElementById('soapPlaceholder');
+        const downloadSoapBtn = document.getElementById('downloadSoapBtn');
+        const soapLoading = document.getElementById('soapLoading');
+        const soapAlert = document.getElementById('soapAlert');
+        const soapRemoveBg = document.getElementById('soapRemoveBg');
+        const debugPanel = document.getElementById('debugPanel');
+        const debugContent = document.getElementById('debugContent');
+        const errorDetails = document.getElementById('errorDetails');
+        const errorContent = document.getElementById('errorContent');
+        
+        let soapCurrentFile = null;
+        let soapResultBase64 = null;
+        let debugVisible = false;
+        
+        // Инициализация обработчиков событий
+        function initEventListeners() {
+            // Обработчики drag & drop для SOAP
+            soapDropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                soapDropZone.classList.add('drag-over');
+            });
+            
+            soapDropZone.addEventListener('dragleave', () => {
+                soapDropZone.classList.remove('drag-over');
+            });
+            
+            soapDropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                soapDropZone.classList.remove('drag-over');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleSoapFile(files[0]);
+                }
+            });
+            
+            // Обработчик выбора файла для SOAP
+            soapFileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleSoapFile(e.target.files[0]);
+                }
+            });
+            
+            // Обработчик кнопки отправки SOAP запроса
+            sendSoapBtn.addEventListener('click', sendSoapRequest);
+            
+            // Обработчик кнопки скачивания результата
+            downloadSoapBtn.addEventListener('click', downloadSoapResult);
+            
+            // Обновляем SOAP запрос при изменении настроек
+            soapRemoveBg.addEventListener('change', updateSoapRequest);
+        }
+        
+        function handleSoapFile(file) {
+            // Проверка типа файла
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/bmp', 'gif'];
+            if (!validTypes.includes(file.type)) {
+                showSoapAlert('Пожалуйста, выберите файл изображения (JPG, PNG, BMP, GIF)', 'error');
+                return;
+            }
+            
+            // Проверка размера файла (макс 2MB для SOAP для тестирования)
+            if (file.size > 2 * 1024 * 1024) {
+                showSoapAlert('Файл слишком большой для SOAP. Максимальный размер - 2MB', 'error');
+                return;
+            }
+            
+            soapCurrentFile = file;
+            
+            // Показываем информацию о файле
+            soapFileName.textContent = file.name;
+            soapFileSize.textContent = formatFileSize(file.size);
+            soapFileInfo.style.display = 'block';
+            
+            // Активируем кнопку отправки
+            sendSoapBtn.disabled = false;
+            
+            // Генерируем SOAP запрос
+            updateSoapRequest();
+            
+            showSoapAlert('Файл готов для SOAP запроса', 'success');
+        }
+        
+        function updateSoapRequest() {
+            if (!soapCurrentFile) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                // Получаем base64 без префикса Data URL
+                const base64 = e.target.result.split(',')[1];
+                generateSoapRequest(base64, soapRemoveBg.checked);
+            };
+            reader.readAsDataURL(soapCurrentFile);
+        }
+        
+        function generateSoapRequest(imageBase64, useBgRemoval) {
+            if (!imageBase64) {
+                debugContent.innerHTML = "Ошибка: base64 пустой";
+                debugPanel.style.display = 'block';
+                return;
+            }
+            
+            // Ограничиваем вывод base64 для отладки
+            const debugBase64 = imageBase64.substring(0, 100) + '...';
+            debugContent.innerHTML = `Base64 (первые 100 символов): ${debugBase64}<br>`;
+            debugContent.innerHTML += `Длина base64: ${imageBase64.length}<br>`;
+            debugContent.innerHTML += `Использовать удаление фона: ${useBgRemoval}<br>`;
+            debugContent.innerHTML += `Примерный размер файла: ${Math.round(imageBase64.length * 0.75)} байт`;
+            
+            if (debugVisible) {
+                debugPanel.style.display = 'block';
+            }
+            
+            const soapRequest = `<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                  xmlns:por="http://portrait-processor-service.ru">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <por:ProcessPortrait>
+         <por:image_base64>${imageBase64}</por:image_base64>
+         <por:use_background_removal>${useBgRemoval}</por:use_background_removal>
+      </por:ProcessPortrait>
+   </soapenv:Body>
+</soapenv:Envelope>`;
+            
+            soapRequestText.value = soapRequest;
+        }
+        
+        async function sendSoapRequest() {
+            if (!soapCurrentFile) {
+                showSoapAlert('Пожалуйста, выберите файл', 'error');
+                return;
+            }
+            
+            // Показываем загрузку
+            soapLoading.style.display = 'flex';
+            sendSoapBtn.disabled = true;
+            errorDetails.style.display = 'none';
+            
+            // Скрываем предыдущие результаты
+            soapResultImage.style.display = 'none';
+            soapPlaceholder.style.display = 'block';
+            downloadSoapBtn.style.display = 'none';
+            
+            try {
+                debugContent.innerHTML += '<br><br>Отправка SOAP запроса...';
+                debugPanel.style.display = 'block';
+                
+                // Отправляем SOAP запрос
+                const response = await fetch('/soap', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/xml; charset=utf-8',
+                        'SOAPAction': 'http://portrait-processor-service.ru/ProcessPortrait'
+                    },
+                    body: soapRequestText.value
+                });
+                
+                debugContent.innerHTML += `<br>Статус ответа: ${response.status}`;
+                debugContent.innerHTML += `<br>Статус текст: ${response.statusText}`;
+                
+                const responseText = await response.text();
+                soapResponseText.value = responseText;
+                
+                // Логируем начало ответа для отладки
+                const responsePreview = responseText.substring(0, 500);
+                debugContent.innerHTML += `<br>Ответ (первые 500 символов):<br>${escapeHtml(responsePreview)}...`;
+                
+                if (response.ok) {
+                    // Парсим SOAP ответ
+                    try {
+                        const parser = new DOMParser();
+                        const xmlDoc = parser.parseFromString(responseText, "text/xml");
+                        
+                        // Проверяем на ошибку парсинга
+                        const parserError = xmlDoc.getElementsByTagName('parsererror');
+                        if (parserError.length > 0) {
+                            debugContent.innerHTML += '<br>Ошибка парсинга XML ответа';
+                            extractAndDisplayResult(responseText);
+                        } else {
+                            extractResultFromXml(xmlDoc);
+                        }
+                    } catch (xmlError) {
+                        debugContent.innerHTML += `<br>Ошибка парсинга XML: ${xmlError.message}`;
+                        extractAndDisplayResult(responseText);
+                    }
+                } else {
+                    debugContent.innerHTML += `<br>HTTP ошибка: ${response.status}`;
+                    showSoapAlert('Ошибка HTTP: ' + response.status, 'error');
+                    
+                    // Показываем детали ошибки
+                    errorContent.innerHTML = escapeHtml(responseText);
+                    errorDetails.style.display = 'block';
+                }
+            } catch (error) {
+                debugContent.innerHTML += `<br>Ошибка сети: ${error.message}`;
+                showSoapAlert('Ошибка сети: ' + error.message, 'error');
+                console.error('Ошибка:', error);
+            } finally {
+                // Скрываем загрузку
+                soapLoading.style.display = 'none';
+                sendSoapBtn.disabled = false;
+            }
+        }
+        
+        function extractResultFromXml(xmlDoc) {
+            // Пробуем разные способы извлечения данных
+            let result = null;
+            let processedImage = null;
+            
+            // 1. Поиск с namespace
+            const ns = 'http://portrait-processor-service.ru';
+            const resultElements = xmlDoc.getElementsByTagNameNS(ns, 'result');
+            const imageElements = xmlDoc.getElementsByTagNameNS(ns, 'processed_image_base64');
+            
+            if (resultElements.length > 0 && imageElements.length > 0) {
+                result = resultElements[0].textContent;
+                processedImage = imageElements[0].textContent;
+            } else {
+                // 2. Поиск без namespace
+                const allResultElements = xmlDoc.getElementsByTagName('result');
+                const allImageElements = xmlDoc.getElementsByTagName('processed_image_base64');
+                
+                if (allResultElements.length > 0 && allImageElements.length > 0) {
+                    result = allResultElements[0].textContent;
+                    processedImage = allImageElements[0].textContent;
+                } else {
+                    // 3. Поиск по тексту (последняя попытка)
+                    const text = xmlDoc.textContent || '';
+                    const resultMatch = text.match(/<result[^>]*>([^<]+)<\/result>/i);
+                    const imageMatch = text.match(/<processed_image_base64[^>]*>([^<]+)<\/processed_image_base64>/i);
+                    
+                    if (resultMatch && imageMatch) {
+                        result = resultMatch[1];
+                        processedImage = imageMatch[1];
+                    }
+                }
+            }
+            
+            if (result && result === 'success' && processedImage) {
+                soapResultBase64 = processedImage;
+                soapResultImage.src = 'data:image/jpeg;base64,' + soapResultBase64;
+                soapResultImage.style.display = 'block';
+                soapPlaceholder.style.display = 'none';
+                downloadSoapBtn.style.display = 'block';
+                
+                debugContent.innerHTML += '<br>Результат: Успешно обработано';
+                showSoapAlert('SOAP запрос успешно обработан!', 'success');
+            } else {
+                // Извлекаем ошибку
+                const faultString = xmlDoc.getElementsByTagName('faultstring');
+                const errorMsg = faultString.length > 0 ? faultString[0].textContent : 'Неизвестная ошибка';
+                
+                debugContent.innerHTML += `<br>Ошибка: ${errorMsg}`;
+                showSoapAlert('Ошибка SOAP: ' + errorMsg, 'error');
+                
+                // Показываем детали ошибки
+                errorContent.innerHTML = escapeHtml(xmlDoc.documentElement.outerHTML);
+                errorDetails.style.display = 'block';
+            }
+        }
+        
+        function extractAndDisplayResult(responseText) {
+            // Пытаемся извлечь base64 с помощью регулярных выражений
+            const base64Match = responseText.match(/<processed_image_base64[^>]*>([A-Za-z0-9+/=]+)<\/processed_image_base64>/);
+            const resultMatch = responseText.match(/<result[^>]*>([^<]+)<\/result>/);
+            
+            if (resultMatch && resultMatch[1] === 'success' && base64Match) {
+                soapResultBase64 = base64Match[1];
+                soapResultImage.src = 'data:image/jpeg;base64,' + soapResultBase64;
+                soapResultImage.style.display = 'block';
+                soapPlaceholder.style.display = 'none';
+                downloadSoapBtn.style.display = 'block';
+                
+                debugContent.innerHTML += '<br>Результат извлечен с помощью regex';
+                showSoapAlert('SOAP запрос успешно обработан!', 'success');
+            } else {
+                debugContent.innerHTML += '<br>Не удалось извлечь результат';
+                showSoapAlert('Не удалось обработать ответ сервера', 'error');
+                
+                // Показываем детали ошибки
+                errorContent.innerHTML = escapeHtml(responseText.substring(0, 2000));
+                errorDetails.style.display = 'block';
+            }
+        }
+        
+        function downloadSoapResult() {
+            if (!soapResultBase64) {
+                showSoapAlert('Нет результата для скачивания', 'error');
+                return;
+            }
+            
+            try {
+                // Создаем ссылку для скачивания
+                const link = document.createElement('a');
+                link.href = 'data:image/jpeg;base64,' + soapResultBase64;
+                link.download = 'soap_processed_' + Date.now() + '.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showSoapAlert('Результат скачан', 'success');
+            } catch (error) {
+                showSoapAlert('Ошибка при скачивании: ' + error.message, 'error');
+            }
+        }
+        
+        function showSoapAlert(message, type) {
+            soapAlert.textContent = message;
+            soapAlert.className = 'alert alert-' + (type === 'error' ? 'error' : 'success');
+            soapAlert.style.display = 'block';
+            
+            setTimeout(() => {
+                soapAlert.style.display = 'none';
+            }, 5000);
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function toggleDebug() {
+            debugVisible = !debugVisible;
+            debugPanel.style.display = debugVisible ? 'block' : 'none';
+        }
+        
+        function showExample() {
+            const example = `<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                  xmlns:por="http://portrait-processor-service.ru">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <por:ProcessPortrait>
+         <por:image_base64>BASE64_STRING_HERE</por:image_base64>
+         <por:use_background_removal>true</por:use_background_removal>
+      </por:ProcessPortrait>
+   </soapenv:Body>
+</soapenv:Envelope>`;
+            
+            alert("Пример SOAP запроса:\n\n" + example);
+        }
+        
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            initEventListeners();
+            
+            // Проверка доступности сервиса
+            fetch('/health')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('SOAP сервис доступен:', data);
+                })
+                .catch(error => {
+                    console.error('Ошибка проверки сервиса:', error);
+                    showSoapAlert('SOAP сервис временно недоступен', 'error');
+                });
+        });
+    </script>
+</body>
+</html>

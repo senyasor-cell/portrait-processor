@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="PortraitProcessorService"
+             targetNamespace="http://portrait-processor-service.ru"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="http://portrait-processor-service.ru"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    
+    <types>
+        <xsd:schema targetNamespace="http://portrait-processor-service.ru">
+            <!-- Request for ProcessPortrait -->
+            <xsd:element name="ProcessPortraitRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="image_base64" type="xsd:string"/>
+                        <xsd:element name="use_background_removal" type="xsd:boolean" minOccurs="0" default="true"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <!-- Response for ProcessPortrait -->
+            <xsd:element name="ProcessPortraitResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="result" type="xsd:string"/>
+                        <xsd:element name="message" type="xsd:string"/>
+                        <xsd:element name="processed_image_base64" type="xsd:string"/>
+                        <xsd:element name="timestamp" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
+    
+    <message name="ProcessPortraitInput">
+        <part name="parameters" element="tns:ProcessPortraitRequest"/>
+    </message>
+    
+    <message name="ProcessPortraitOutput">
+        <part name="parameters" element="tns:ProcessPortraitResponse"/>
+    </message>
+    
+    <portType name="PortraitProcessorPortType">
+        <operation name="ProcessPortrait">
+            <input message="tns:ProcessPortraitInput"/>
+            <output message="tns:ProcessPortraitOutput"/>
+        </operation>
+    </portType>
+    
+    <binding name="PortraitProcessorSoapBinding" type="tns:PortraitProcessorPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="ProcessPortrait">
+            <soap:operation soapAction="http://portrait-processor-service.ru/ProcessPortrait"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
+    
+    <service name="PortraitProcessorService">
+        <port name="PortraitProcessorPort" binding="tns:PortraitProcessorSoapBinding">
+            <soap:address location="{{HOST}}/soap"/>
+        </port>
+    </service>
+</definitions>

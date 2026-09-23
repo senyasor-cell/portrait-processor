@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portrait Processor - Веб-интерфейс</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Portrait Processor</h1>
+            <p>Автоматическая обработка портретов с удалением фона и кадрированием</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="upload-section">
+                <h2>📤 Загрузите фотографию</h2>
+                
+                <div class="alert" id="alert"></div>
+                
+                <div class="file-upload" id="dropZone">
+                    <div class="upload-icon">📷</div>
+                    <p>Перетащите файл сюда или</p>
+                    <button class="btn-primary" onclick="document.getElementById('fileInput').click()">
+                        Выберите файл
+                    </button>
+                    <input type="file" id="fileInput" class="file-input" accept=".jpg,.jpeg,.png,.bmp,.gif">
+                </div>
+                
+                <div class="file-info" id="fileInfo">
+                    <strong>Выбранный файл:</strong>
+                    <span id="fileName"></span>
+                    <br>
+                    <small>Размер: <span id="fileSize"></span></small>
+                </div>
+                
+                <div class="options">
+                    <h3>Настройки обработки:</h3>
+                    <div class="option">
+                        <input type="checkbox" id="removeBg" checked>
+                        <label for="removeBg">Удалить фон (используя rembg)</label>
+                    </div>
+                    <p><small>После удаления фона фотография кадрируется так, чтобы кончик носа был в центре по горизонтали</small></p>
+                </div>
+                
+                <button class="btn-primary" id="processBtn" onclick="processImage()" disabled>
+                    <span>🚀 Начать обработку</span>
+                </button>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Обработка изображения...</p>
+                </div>
+            </div>
+            
+            <div class="preview-section">
+                <h2>👁‍🗨 Предпросмотр результата</h2>
+                
+                <div class="image-container">
+                    <img id="previewImage" src="" alt="Предпросмотр" style="display: none;">
+                    <div id="placeholderText">Здесь будет отображен результат</div>
+                </div>
+                
+                <div class="result-info" id="resultInfo">
+                    <strong>Результат обработки:</strong><br>
+                    <span id="resultMessage"></span>
+                </div>
+                
+                <a href="#" class="btn-success" id="downloadBtn" download>
+                    💾 Скачать обработанное изображение
+                </a>
+            </div>
+        </div>
+        
+        <div class="service-info">
+            <h3>🌐 Доступные сервисы</h3>
+            <p>Портрет-процессор доступен через SOAP API и веб-интерфейс</p>
+            <div class="endpoint-list">
+                <div class="endpoint">
+                    <strong>SOAP Endpoint:</strong><br>
+                    <a href="/soap" target="_blank">/soap</a>
+                </div>
+                <div class="endpoint">
+                    <strong>WSDL:</strong><br>
+                    <a href="/wsdl" target="_blank">/wsdl</a>
+                </div>
+                <div class="endpoint">
+                    <strong>SOAP Клиент:</strong><br>
+                    <a href="/soap-client" target="_blank">/soap-client</a>
+                </div>
+                <div class="endpoint">
+                    <strong>Health Check:</strong><br>
+                    <a href="/health" target="_blank">/health</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Элементы DOM
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const processBtn = document.getElementById('processBtn');
+        const previewImage = document.getElementById('previewImage');
+        const placeholderText = document.getElementById('placeholderText');
+        const resultInfo = document.getElementById('resultInfo');
+        const resultMessage = document.getElementById('resultMessage');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const loading = document.getElementById('loading');
+        const alertDiv = document.getElementById('alert');
+        const removeBgCheckbox = document.getElementById('removeBg');
+        
+        let currentFile = null;
+        
+        // Обработчики drag & drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        // Обработчик выбора файла
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        function handleFile(file) {
+            // Проверка типа файла
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/bmp', 'image/gif'];
+            if (!validTypes.includes(file.type)) {
+                showAlert('Пожалуйста, выберите файл изображения (JPG, PNG, BMP, GIF)', 'error');
+                return;
+            }
+            
+            // Проверка размера файла (макс 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showAlert('Файл слишком большой. Максимальный размер - 10MB', 'error');
+                return;
+            }
+            
+            currentFile = file;
+            
+            // Показываем информацию о файле
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.style.display = 'block';
+            
+            // Активируем кнопку обработки
+            processBtn.disabled = false;
+            
+            // Показываем предпросмотр
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewImage.style.display = 'block';
+                placeholderText.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+            
+            showAlert('Файл успешно загружен', 'success');
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function showAlert(message, type) {
+            alertDiv.textContent = message;
+            alertDiv.className = 'alert alert-' + (type === 'error' ? 'error' : 'success');
+            alertDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        async function processImage() {
+            if (!currentFile) {
+                showAlert('Пожалуйста, выберите файл', 'error');
+                return;
+            }
+            
+            // Показываем загрузку
+            loading.style.display = 'flex';
+            processBtn.disabled = true;
+            
+            // Скрываем предыдущие результаты
+            resultInfo.style.display = 'none';
+            downloadBtn.style.display = 'none';
+            
+            // Создаем FormData
+            const formData = new FormData();
+            formData.append('image', currentFile);
+            formData.append('use_background_removal', removeBgCheckbox.checked);
+            
+            try {
+                // Отправляем запрос на сервер
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // Показываем результат
+                    previewImage.src = result.processed_image;
+                    resultMessage.textContent = result.message;
+                    resultInfo.style.display = 'block';
+                    
+                    // Настраиваем кнопку скачивания
+                    downloadBtn.href = result.download_url;
+                    downloadBtn.download = result.filename;
+                    downloadBtn.style.display = 'block';
+                    
+                    showAlert('Изображение успешно обработано!', 'success');
+                } else {
+                    showAlert(result.error || 'Ошибка при обработке изображения', 'error');
+                }
+            } catch (error) {
+                showAlert('Ошибка сети: ' + error.message, 'error');
+                console.error('Ошибка:', error);
+            } finally {
+                // Скрываем загрузку
+                loading.style.display = 'none';
+                processBtn.disabled = false;
+            }
+        }
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            // Проверка доступности сервиса
+            fetch('/health')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Сервис доступен:', data);
+                })
+                .catch(error => {
+                    console.error('Ошибка проверки сервиса:', error);
+                    showAlert('Сервис временно недоступен', 'error');
+                });
+        });
+    </script>
+</body>
+</html>
