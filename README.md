@@ -83,7 +83,6 @@ text<br>
 Content-Type: text/xml; charset=utf-8<br>
 SOAPAction: http://portrait-processor-service.ru/ProcessPortrait<br>
 Пример запроса:<br>
-xml
 <?xml version="1.0" encoding="UTF-8"?><br>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" <br>
 &emsp;&emsp;xmlns:por="http://portrait-processor-service.ru"><br>
@@ -96,7 +95,6 @@ xml
 &nbsp;</soapenv:Body><br>
 </soapenv:Envelope><br>
 Пример успешного ответа:<br>
-xml
 <?xml version="1.0" encoding="UTF-8"?><br>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" <br>
 &emsp;&emsp;xmlns:por="http://portrait-processor-service.ru"><br>
@@ -110,7 +108,6 @@ xml
 &nbsp;</soapenv:Body><br>
 </soapenv:Envelope><br>
 Пример ответа с ошибкой:<br>
-xml
 <?xml version="1.0" encoding="UTF-8"?><br>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"><br>
 &nbsp;<soapenv:Body><br>
