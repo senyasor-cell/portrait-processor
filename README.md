@@ -69,6 +69,7 @@ SOAP-сервис: http://localhost:5000/soap<br>
 WSDL: http://localhost:5000/wsdl<br>
 ![WSDL](screenshots/wsdl.jpg)
 SOAP-клиент: http://localhost:5000/soap-client<br>
+![SOAP](screenshots/soap.jpg)
 Проверка здоровья: http://localhost:5000/health<br>
 # 🖥 Использование
 Веб-интерфейс
