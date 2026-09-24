@@ -82,43 +82,43 @@ Endpoint: POST http://localhost:5000/soap<br>
 text<br>
 Content-Type: text/xml; charset=utf-8<br>
 SOAPAction: http://portrait-processor-service.ru/ProcessPortrait<br>
-Пример запроса:<br><br>
+Пример запроса:<br>
 xml<br>
 <?xml version="1.0" encoding="UTF-8"?><br>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" <br>
-                  xmlns:por="http://portrait-processor-service.ru"><br>
-   <soapenv:Header/><br>
-   <soapenv:Body><br>
-      <por:ProcessPortrait><br>
-         <por:image_base64>BASE64_ENCODED_IMAGE</por:image_base64><br>
-         <por:use_background_removal>true</por:use_background_removal><br>
-      </por:ProcessPortrait><br>
-   </soapenv:Body><br>
+&emsp;&emsp;xmlns:por="http://portrait-processor-service.ru"><br>
+&nbsp;<soapenv:Header/><br>
+&nbsp;<soapenv:Body><br>
+&ensp;<por:ProcessPortrait><br>
+&emsp;<por:image_base64>BASE64_ENCODED_IMAGE</por:image_base64><br>
+&emsp;<por:use_background_removal>true</por:use_background_removal><br>
+&ensp;</por:ProcessPortrait><br>
+&nbsp;</soapenv:Body><br>
 </soapenv:Envelope><br>
-Пример успешного ответа:<br><br>
+Пример успешного ответа:<br>
 xml<br>
 <?xml version="1.0" encoding="UTF-8"?><br>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" <br>
-                  xmlns:por="http://portrait-processor-service.ru"><br>
-   <soapenv:Body><br>
-      <por:ProcessPortraitResponse><br>
-         <por:result>success</por:result><br>
-         <por:message>Изображение успешно обработано</por:message><br>
-         <por:processed_image_base64>BASE64_ENCODED_RESULT</por:processed_image_base64><br>
-         <por:timestamp>2024-01-01T12:00:00</por:timestamp><br>
-      </por:ProcessPortraitResponse><br>
-   </soapenv:Body><br>
+&emsp;&emsp;xmlns:por="http://portrait-processor-service.ru"><br>
+&nbsp;<soapenv:Body><br>
+&ensp;<por:ProcessPortraitResponse><br>
+&emsp;<por:result>success</por:result><br>
+&emsp;<por:message>Изображение успешно обработано</por:message><br>
+&emsp;<por:processed_image_base64>BASE64_ENCODED_RESULT</por:processed_image_base64><br>
+&emsp;<por:timestamp>2024-01-01T12:00:00</por:timestamp><br>
+&ensp;</por:ProcessPortraitResponse><br>
+&nbsp;</soapenv:Body><br>
 </soapenv:Envelope><br>
-Пример ответа с ошибкой:<br><br>
+Пример ответа с ошибкой:<br>
 xml<br>
 <?xml version="1.0" encoding="UTF-8"?><br>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"><br>
-   <soapenv:Body><br>
-      <soapenv:Fault><br>
-         <faultcode>soapenv:Server</faultcode><br>
-         <faultstring>Ошибка обработки: ...</faultstring><br>
-      </soapenv:Fault><br>
-   </soapenv:Body><br>
+&nbsp;<soapenv:Body><br>
+&ensp;<soapenv:Fault><br>
+&emsp;<faultcode>soapenv:Server</faultcode><br>
+&emsp;<faultstring>Ошибка обработки: ...</faultstring><br>
+&ensp;</soapenv:Fault><br>
+&nbsp;</soapenv:Body><br>
 </soapenv:Envelope>
 WSDL: доступен по адресу http://localhost:5000/wsdl<br>
 SOAP клиент
