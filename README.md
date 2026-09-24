@@ -1,8 +1,8 @@
 # Portrait Processor SOAP Web Service
 &emsp;Сервис для автоматической обработки портретных фотографий с возможностью удаления фона, кадрирования и улучшения качества. Предоставляет SOAP API и веб-интерфейс для ручной загрузки.<br>
 &emsp;Проект предназначен в первую очередь для ускорения фотографирования с помощью веб камер посетителей в таких подразделениях как бюро пропусков, отделы кадров, учебные отделы и получения однообразного результата без необходимости ручной обработки изображений.<br>
-![Input](screenshots/Брюс.jpg)<br>
-![Output](screenshots/Брюс+.jpg)<br>
+![Input](screenshots/Брюс.jpg)
+![Output](screenshots/Брюс+.jpg)
 # 📋 Содержание
 Возможности<br>
 Технологии<br>
@@ -67,6 +67,7 @@ python app.py<br>
 Веб-интерфейс: http://localhost:5000/<br>
 SOAP-сервис: http://localhost:5000/soap<br>
 WSDL: http://localhost:5000/wsdl<br>
+![WSDL](screenshots/wsdl.jpg)
 SOAP-клиент: http://localhost:5000/soap-client<br>
 Проверка здоровья: http://localhost:5000/health<br>
 # 🖥 Использование
