@@ -82,7 +82,7 @@ Endpoint: POST http://localhost:5000/soap<br>
 text<br>
 Content-Type: text/xml; charset=utf-8<br>
 SOAPAction: http://portrait-processor-service.ru/ProcessPortrait<br>
-Пример запроса:<br>
+Пример запроса:
 <?xml version="1.0" encoding="UTF-8"?><br>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" <br>
 &emsp;&emsp;xmlns:por="http://portrait-processor-service.ru"><br>
@@ -94,7 +94,7 @@ SOAPAction: http://portrait-processor-service.ru/ProcessPortrait<br>
 &ensp;</por:ProcessPortrait><br>
 &nbsp;</soapenv:Body><br>
 </soapenv:Envelope><br>
-Пример успешного ответа:<br>
+Пример успешного ответа:
 <?xml version="1.0" encoding="UTF-8"?><br>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" <br>
 &emsp;&emsp;xmlns:por="http://portrait-processor-service.ru"><br>
@@ -107,7 +107,7 @@ SOAPAction: http://portrait-processor-service.ru/ProcessPortrait<br>
 &ensp;</por:ProcessPortraitResponse><br>
 &nbsp;</soapenv:Body><br>
 </soapenv:Envelope><br>
-Пример ответа с ошибкой:<br>
+Пример ответа с ошибкой:
 <?xml version="1.0" encoding="UTF-8"?><br>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"><br>
 &nbsp;<soapenv:Body><br>
