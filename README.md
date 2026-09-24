@@ -76,49 +76,49 @@ SOAP-клиент: http://localhost:5000/soap-client<br>
 При необходимости снимите галочку «Удалить фон»<br>
 Нажмите «Начать обработку»<br>
 После завершения вы увидите результат и кнопку «Скачать обработанное изображение»<br>
-SOAP API
+SOAP API<br>
 Endpoint: POST http://localhost:5000/soap<br>
 Заголовки:<br>
-text
-Content-Type: text/xml; charset=utf-8
-SOAPAction: http://portrait-processor-service.ru/ProcessPortrait
-Пример запроса:<br>
-xml
-<?xml version="1.0" encoding="UTF-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-                  xmlns:por="http://portrait-processor-service.ru">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <por:ProcessPortrait>
-         <por:image_base64>BASE64_ENCODED_IMAGE</por:image_base64>
-         <por:use_background_removal>true</por:use_background_removal>
-      </por:ProcessPortrait>
-   </soapenv:Body>
-</soapenv:Envelope>
-Пример успешного ответа:<br>
-xml
-<?xml version="1.0" encoding="UTF-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-                  xmlns:por="http://portrait-processor-service.ru">
-   <soapenv:Body>
-      <por:ProcessPortraitResponse>
-         <por:result>success</por:result>
-         <por:message>Изображение успешно обработано</por:message>
-         <por:processed_image_base64>BASE64_ENCODED_RESULT</por:processed_image_base64>
-         <por:timestamp>2024-01-01T12:00:00</por:timestamp>
-      </por:ProcessPortraitResponse>
-   </soapenv:Body>
-</soapenv:Envelope>
-Пример ответа с ошибкой:<br>
-xml
-<?xml version="1.0" encoding="UTF-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
-   <soapenv:Body>
-      <soapenv:Fault>
-         <faultcode>soapenv:Server</faultcode>
-         <faultstring>Ошибка обработки: ...</faultstring>
-      </soapenv:Fault>
-   </soapenv:Body>
+text<br>
+Content-Type: text/xml; charset=utf-8<br>
+SOAPAction: http://portrait-processor-service.ru/ProcessPortrait<br>
+Пример запроса:<br><br>
+xml<br>
+<?xml version="1.0" encoding="UTF-8"?><br>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" <br>
+                  xmlns:por="http://portrait-processor-service.ru"><br>
+   <soapenv:Header/><br>
+   <soapenv:Body><br>
+      <por:ProcessPortrait><br>
+         <por:image_base64>BASE64_ENCODED_IMAGE</por:image_base64><br>
+         <por:use_background_removal>true</por:use_background_removal><br>
+      </por:ProcessPortrait><br>
+   </soapenv:Body><br>
+</soapenv:Envelope><br>
+Пример успешного ответа:<br><br>
+xml<br>
+<?xml version="1.0" encoding="UTF-8"?><br>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" <br>
+                  xmlns:por="http://portrait-processor-service.ru"><br>
+   <soapenv:Body><br>
+      <por:ProcessPortraitResponse><br>
+         <por:result>success</por:result><br>
+         <por:message>Изображение успешно обработано</por:message><br>
+         <por:processed_image_base64>BASE64_ENCODED_RESULT</por:processed_image_base64><br>
+         <por:timestamp>2024-01-01T12:00:00</por:timestamp><br>
+      </por:ProcessPortraitResponse><br>
+   </soapenv:Body><br>
+</soapenv:Envelope><br>
+Пример ответа с ошибкой:<br><br>
+xml<br>
+<?xml version="1.0" encoding="UTF-8"?><br>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"><br>
+   <soapenv:Body><br>
+      <soapenv:Fault><br>
+         <faultcode>soapenv:Server</faultcode><br>
+         <faultstring>Ошибка обработки: ...</faultstring><br>
+      </soapenv:Fault><br>
+   </soapenv:Body><br>
 </soapenv:Envelope>
 WSDL: доступен по адресу http://localhost:5000/wsdl<br>
 SOAP клиент
